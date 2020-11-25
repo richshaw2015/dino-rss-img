@@ -34,8 +34,9 @@ def get_html(url: str) -> str:
 
 def sync_host_favicon(url: str) -> str:
     host = get_short_host_name(url)
-    png = os.path.join('png', f"{host}.png")
-    jpg = os.path.join('png', f"{host}.jpg")
+
+    png = os.path.join('img', f"{host}.png")
+    jpg = os.path.join('img', f"{host}.jpg")
 
     if os.path.exists(png):
         return png
