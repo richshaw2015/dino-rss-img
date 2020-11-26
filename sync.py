@@ -22,7 +22,10 @@ def get_html(url: str) -> str:
         return open(html_file, encoding='UTF8').read()
     else:
         try:
-            rsp = requests.get(url, timeout=30, verify=False)
+            rsp = requests.get(url, timeout=60, verify=False, headers={
+                "Referer": url,
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36",
+            })
             if rsp and rsp.ok:
                 open(html_file, 'w', encoding='UTF8').write(rsp.text)
                 return rsp.text
@@ -58,13 +61,15 @@ def sync_host_favicon(url: str) -> str:
                 icon = response.selector.xpath("//meta[@name='og:image']/@content").extract_first()
             if not icon:
                 icon = response.selector.xpath("//link[@rel='icon'][last()]/@href").extract_first()
+            if not icon:
+                icon = response.selector.xpath("//link[@rel='shortcut icon'][last()]/@href").extract_first()
 
             if icon:
                 icon_url = urljoin(url, icon.strip())
                 try:
                     urllib.request.urlretrieve(icon_url, png)
                 except Exception as e:
-                    logging.warning(f"{icon_url}: {e}")
+                    logging.warning(f"{url} {icon_url} {e}")
             else:
                 logging.warning(url)
 
@@ -72,7 +77,7 @@ def sync_host_favicon(url: str) -> str:
 
 
 def main() -> None:
-    rsp = requests.get(f"{SERVER}/api/monitor/todo/feeds")
+    rsp = requests.get(f"{SERVER}/api/monitor/noimg/feeds")
     links = rsp.json()['links']
 
     for link in links:
